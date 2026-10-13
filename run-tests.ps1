@@ -25,10 +25,11 @@ if (-not $node) {
 }
 
 $suites = @(
-  @{ n = '1/4  HTML 标签嵌套';   f = 'test\check-html.js' },
-  @{ n = '2/4  逻辑层';          f = 'test\core.test.js' },
-  @{ n = '3/4  布局 / CSS 回归'; f = 'test\layout.test.js' },
-  @{ n = '4/4  界面冒烟';        f = 'test\smoke.js' }
+  @{ n = '1/5  HTML 标签嵌套';   f = 'test\check-html.js' },
+  @{ n = '2/5  编码守卫';        f = 'test\encoding.test.js' },
+  @{ n = '3/5  逻辑层';          f = 'test\core.test.js' },
+  @{ n = '4/5  布局 / CSS 回归'; f = 'test\layout.test.js' },
+  @{ n = '5/5  界面冒烟';        f = 'test\smoke.js' }
 )
 
 $failed = @()
@@ -41,7 +42,7 @@ foreach ($s in $suites) {
 
 Write-Host ""
 if ($failed.Count -eq 0) {
-  Write-Host "四套测试全部通过。" -ForegroundColor Green
+  Write-Host "五套测试全部通过。" -ForegroundColor Green
   exit 0
 } else {
   Write-Host ("有测试失败:" + ($failed -join ' / ')) -ForegroundColor Red

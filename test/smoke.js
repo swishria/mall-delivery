@@ -283,9 +283,19 @@ var click = function (node, label) {
 
 group('2. 顾客端首屏');
 
-eq('商品网格渲染出 21 个商品', $('prodGrid').children.length, C.CATALOG.length);
-ok('商品卡里有"冰红茶"', $('prodGrid').__text().indexOf('冰红茶') >= 0);
-ok('商品卡里有价格 ¥4.00', $('prodGrid').__text().indexOf('4.00') >= 0);
+// 商品改成了紧凑列表: #prodGrid > .plist > 若干 .prow,默认只显示 PROD_PAGE 个
+function productRows() {
+  var wrap = $('prodGrid').children[0];
+  return (wrap && wrap.children) ? wrap.children : [];
+}
+
+eq('商品列表默认只渲染 7 行(其余的收起来,保证一屏放得下)', productRows().length, 7);
+ok('有「展开看看」按钮', $('prodGrid').children.length === 2 &&
+  String($('prodGrid').children[1].className).indexOf('morebtn') >= 0,
+  $('prodGrid').children.map(function (c) { return c.className; }).join(' | '));
+ok('第一行是冰红茶', productRows()[0] && productRows()[0].innerHTML.indexOf('冰红茶') >= 0,
+  productRows()[0] && productRows()[0].innerHTML.slice(0, 80));
+ok('行里有价格 4.00', productRows()[0].innerHTML.indexOf('4.00') >= 0);
 ok('分类条渲染出来了', $('catBar').children.length >= 5, $('catBar').children.length);
 ok('快捷标签渲染出来了', $('quickTags').children.length === C.QUICK_TAGS.length);
 ok('楼层下拉有 4 个选项', $('cFloor').children.length === 4, $('cFloor').children.length);
@@ -293,12 +303,26 @@ ok('空篮子时购物车栏是隐藏的', $('cartBar').classList.contains('hide
 ok('没有订单时显示空态', $('myOrders').__text().indexOf('还没有订单') >= 0,
   $('myOrders').__text().slice(0, 80));
 
+group('2.5 地址区默认收起,省一屏空间');
+
+ok('地址摘要是显示状态', $('addrBar').style.display === 'flex', $('addrBar').style.display);
+ok('地址表单是隐藏状态', $('addrForm').style.display === 'none', $('addrForm').style.display);
+ok('摘要文案有内容', String($('addrNow').textContent).length > 0, $('addrNow').textContent);
+
+group('2.6 展开 / 收起商品列表');
+
+$('prodGrid').children[1].onclick();
+eq('展开后显示全部商品', productRows().length, C.CATALOG.length);
+ok('展开后按钮变成「收起」', $('prodGrid').children[1].innerHTML.indexOf('收起') >= 0);
+$('prodGrid').children[1].onclick();
+eq('再点一次收回 7 行', productRows().length, 7);
+
 /* ============ 5. 加入购物篮 ============ */
 
 group('3. 加东西进篮子');
 
-// 点第一个商品卡 → 打开商品抽屉
-click($('prodGrid').children[0]);
+// 点第一行商品 → 打开商品抽屉
+click(productRows()[0]);
 ok('点商品会打开抽屉', $('sheetItem').classList.contains('on'));
 eq('抽屉标题是商品名', $('itTitle').textContent, '冰红茶');
 eq('抽屉初始数量', $('itQty').textContent, '1');
@@ -314,22 +338,17 @@ eq('篮子件数', $('cartCount').textContent, '2');
 eq('篮子金额 4×2', $('cartTotal').textContent, '¥8.00');
 ok('篮子里有冰红茶', $('cartBody').__text().indexOf('冰红茶') >= 0);
 
-// 再加一个不同商品
-click($('prodGrid').children[4]);   // 矿泉水 ¥2
+// 再加一个不同商品(列表第二行是可乐 ¥4)
+click(productRows()[1]);
 click($('btnItAdd'));
 eq('两样东西共 3 件', $('cartCount').textContent, '3');
-eq('合计 8 + 2', $('cartTotal').textContent, '¥10.00');
+eq('合计 8 + 4', $('cartTotal').textContent, '¥12.00');
 
-// 篮子里的减号
-var minus = null;
-ctx.all.forEach(function (n) {
-  if (n.getAttribute && n.getAttribute('data-m') === 'minus' && !minus) minus = n;
-});
-// 假 DOM 的 querySelector 不解析真实子节点,所以直接验证逻辑:用 +1 再 -1
-click($('prodGrid').children[4]);
+// 再点同一样,数量应该累加
+click(productRows()[1]);
 click($('btnItAdd'));
-eq('又加一件矿泉水 → 4 件', $('cartCount').textContent, '4');
-eq('金额 8+2+2', $('cartTotal').textContent, '¥12.00');
+eq('又加一件可乐 → 4 件', $('cartCount').textContent, '4');
+eq('金额 8+4+4', $('cartTotal').textContent, '¥16.00');
 
 /* ============ 6. 自己打字加东西 ============ */
 
@@ -339,7 +358,7 @@ $('cCustom').value = '创可贴';
 click($('btnCustom'));
 // 同一件商品再加一次会合并成一行,但件数继续累加 → 6 件
 eq('自定义商品也进篮子(累计 5 件)', $('cartCount').textContent, '5');
-eq('自定义商品价格 0,总额不变', $('cartTotal').textContent, '¥12.00');
+eq('自定义商品价格 0,总额不变', $('cartTotal').textContent, '¥16.00');
 ok('输入框被清空', $('cCustom').value === '', $('cCustom').value);
 ok('篮子里有"创可贴"', $('cartBody').__text().indexOf('创可贴') >= 0);
 ok('创可贴标了 0 元(等店家填价)',
@@ -373,9 +392,9 @@ eq('铺位号被规范化', saved.orders[0].booth, 'A12');
 eq('楼层带上了', saved.orders[0].floor, '5F');
 eq('手机号清洗过', saved.orders[0].phone, '13800001111');
 eq('初始状态是待接单', saved.orders[0].status, 'pending');
-eq('金额 = 8 + 2 + 2 + 0', saved.orders[0].amount, 12);
+eq('金额 = 8 + 4 + 4 + 0(创可贴 0 元)', saved.orders[0].amount, 16);
 // 矿泉水加了两次会和上一行合并成一行,所以是 3 行:冰红茶 / 矿泉水 / 创可贴
-eq('3 行商品(创可贴 0 元,矿泉水合并成一行)', saved.orders[0].lines.length, 3);
+eq('3 行商品(创可贴 0 元,可乐合并成一行)', saved.orders[0].lines.length, 3);
 ok('有一行是 0 元的自写商品',
   saved.orders[0].lines.some(function (l) { return l.name === '创可贴' && l.price === 0; }),
   saved.orders[0].lines.map(function (l) { return l.name + ':' + l.price; }));
@@ -409,7 +428,7 @@ if (process.env.SMOKE_DEBUG) {
 eq('顾客端藏起来', $('viewCust').style.display, 'none');
 ok('商家端显示出来', $('viewMerch').style.display !== 'none');
 ok('统计卡片有内容', $('statGrid').innerHTML.indexOf('待接单') >= 0);
-ok('统计里营业额是 ¥12.00', $('statGrid').innerHTML.indexOf('12.00') >= 0);
+ok('统计里营业额是 ¥16.00', $('statGrid').innerHTML.indexOf('16.00') >= 0);
 ok('订单列表里有那一单', $('orderList').__text().indexOf('A12') >= 0, $('orderList').__text().slice(0, 100));
 ok('订单卡片上有"接单,去送"', $('orderList').__text().indexOf('接单') >= 0);
 ok('订单卡片上有"未付款"标记', $('orderList').__text().indexOf('未付款') >= 0);

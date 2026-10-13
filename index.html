@@ -72,16 +72,15 @@
   @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
 
   /* ---------- 通用 ---------- */
-  /* 内容区:不再自己滚动,交给页面滚 —— 移动端最稳 */
+  /* 内容区:交给页面滚动。同时整体做得紧凑,常见情况一屏就够,不用滑。 */
   .scroll{
-    flex:1; padding:12px 12px calc(130px + env(safe-area-inset-bottom));
-    scroll-behavior:smooth
+    flex:1; padding:8px 10px calc(74px + env(safe-area-inset-bottom))
   }
-  .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:12px;margin-bottom:10px}
+  .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:10px;margin-bottom:7px}
   .row{display:flex;align-items:center;gap:8px}
   .muted{color:var(--ink2);font-size:12px}
   .tiny{font-size:11px;color:var(--ink3)}
-  .sec-title{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;margin:14px 4px 8px}
+  .sec-title{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;margin:9px 4px 6px}
   .sec-title:first-child{margin-top:2px}
   .sec-title .bar{width:3px;height:13px;border-radius:2px;background:var(--brand)}
   .sec-title .hint{margin-left:auto;font-weight:400;font-size:11px;color:var(--ink3)}
@@ -114,37 +113,41 @@
   }
   .chip:active{transform:scale(.95)}
   .chip.on{background:#fff3ea;color:var(--brand);border-color:#ffd0ae}
-  .chipbar{display:flex;gap:7px;overflow-x:auto;padding:2px 4px 8px;scrollbar-width:none}
+  .chipbar{display:flex;gap:6px;overflow-x:auto;padding:0 2px 6px;scrollbar-width:none}
   .chipbar::-webkit-scrollbar{display:none}
 
   /* ---------- 顾客端:商品 ---------- */
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-  .prod{
-    background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:10px;
-    display:flex;flex-direction:column;gap:6px;position:relative;transition:.15s;
-    border:1.5px solid transparent;min-height:104px
+  /* 一屏放得下的紧凑列表:一行一个商品(名字 + 规格 + 价格 + 加号)。
+     不做大卡片网格 —— 21 个卡片会撑出很长一页,手机就得滑动。 */
+  .plist{display:flex;flex-direction:column;gap:5px}
+  .prow{
+    display:flex;align-items:center;gap:9px;background:#fff;border-radius:11px;
+    box-shadow:var(--shadow);padding:7px 9px;transition:.12s;border:1.5px solid transparent
   }
-  .prod:active{transform:scale(.975);border-color:#ffd8ba;background:#fffaf6}
-  .prod .emoji{font-size:22px;line-height:1}
-  .prod .nm{font-weight:650;font-size:13.5px}
-  .prod .sp{font-size:11px;color:var(--ink3);margin-top:-3px}
-  .prod .foot{display:flex;align-items:flex-end;justify-content:space-between;margin-top:auto}
-  .prod .price{color:var(--brand);font-weight:750;font-size:15px}
-  .prod .price i{font-size:10.5px;font-style:normal;font-weight:600}
-  .prod .add{
-    width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;
-    display:grid;place-items:center;font-size:15px;font-weight:700;line-height:1;flex:none
+  .prow:active{transform:scale(.985);background:#fffaf6;border-color:#ffd8ba}
+  .prow .em{font-size:18px;line-height:1;flex:none}
+  .prow .mid{flex:1;min-width:0}
+  .prow .nm{display:block;font-weight:650;font-size:13.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .prow .sp{display:block;font-size:10.5px;color:var(--ink3);line-height:1.2}
+  .prow .pr{color:var(--brand);font-weight:750;font-size:14px;flex:none}
+  .prow .pr i{font-size:10px;font-style:normal;font-weight:600}
+  .prow .add{
+    width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;
+    display:grid;place-items:center;font-size:16px;font-weight:700;line-height:1;flex:none
   }
-  .prod .qtybadge{
-    position:absolute;top:8px;right:8px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;
-    background:var(--brand);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center
+  .prow .qb{
+    min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:#fff3ea;color:var(--brand);
+    font-size:11px;font-weight:750;display:grid;place-items:center;flex:none;border:1.5px solid #ffd0ae
   }
-  .hot{
-    position:absolute;top:-1px;left:-1px;background:var(--danger);color:#fff;font-size:9.5px;
-    font-weight:700;padding:2px 6px;border-radius:var(--r) 0 var(--r) 0;letter-spacing:.3px
+  .prow.hot-row{background:linear-gradient(90deg,#fffaf6,#fff)}
+  .prow .hotd{font-size:9.5px;font-weight:750;color:#fff;background:var(--danger);padding:1px 5px;border-radius:5px;flex:none}
+  .morebtn{
+    width:100%;text-align:center;padding:8px;border-radius:11px;background:#fff;
+    box-shadow:var(--shadow);font-size:12.5px;font-weight:650;color:var(--ink2);margin-top:5px
   }
-  .empty{text-align:center;padding:28px 16px;color:var(--ink3)}
-  .empty .big{font-size:34px;margin-bottom:8px}
+  .morebtn:active{background:#f1f4f9}
+  .empty{text-align:center;padding:20px 14px;color:var(--ink3)}
+  .empty .big{font-size:30px;margin-bottom:6px}
 
   /* ---------- 购物车栏 ---------- */
   /* fixed + 居中,理由同抽屉 */
@@ -203,7 +206,7 @@
   .stepper .n{min-width:26px;text-align:center;font-weight:700;font-size:13px}
 
   /* 标签选择 */
-  .tagpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .tagpick{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
 
   /* 订单成功的进度条 */
   .steps{display:flex;align-items:center;gap:0;margin:10px 0 2px}
@@ -222,10 +225,11 @@
   .steps .s.on:not(:last-child)::after{background:var(--ok)}
 
   /* ---------- 商家端 ---------- */
-  .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
-  .stat{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:11px 12px}
+  /* 商家端统计:4 列一行放完,不用滑 */
+  .statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+  .stat{background:#fff;border-radius:11px;box-shadow:var(--shadow);padding:8px 6px;text-align:center}
   .stat .k{font-size:11px;color:var(--ink3);font-weight:600;margin-bottom:2px}
-  .stat .v{font-size:19px;font-weight:750;letter-spacing:-.3px}
+  .stat .v{font-size:15px;font-weight:750;letter-spacing:-.3px;line-height:1.25}
   .stat .v small{font-size:11px;font-weight:600;color:var(--ink3);margin-left:2px}
   .stat.hi .v{color:var(--brand)}
   .stat.good .v{color:var(--ok)}
@@ -326,27 +330,39 @@
   <div class="scroll" id="viewCust">
     <div class="sec-title"><span class="bar"></span>送到哪儿<span class="hint">记住上次,下次一点就好</span></div>
     <div class="card">
-      <div class="row" style="gap:8px">
-        <label class="fld" style="flex:0 0 110px;margin-bottom:0">
-          <span>楼层</span>
-          <select class="inp" id="cFloor"></select>
-        </label>
-        <label class="fld" style="flex:1;margin-bottom:0">
-          <span>铺位号 / 店名</span>
-          <input class="inp" id="cBooth" placeholder="如 A12 或 美甲店" autocomplete="off">
-        </label>
+      <!-- 默认只占一行:显示上次用的位置。点「改」才展开表单,省一屏空间 -->
+      <div class="row" id="addrBar" style="justify-content:space-between">
+        <div class="row" style="gap:7px;min-width:0">
+          <span style="font-size:16px">📍</span>
+          <div style="min-width:0">
+            <div id="addrNow" style="font-weight:700;font-size:13.5px">还没有填过位置</div>
+            <div class="tiny" id="addrSub">下单时可以填,填过一次就会记住</div>
+          </div>
+        </div>
+        <button class="btn ghost sm" id="btnAddr" style="flex:none">改</button>
       </div>
-      <div id="boothChips" class="tagpick" style="margin-top:9px"></div>
+      <div id="addrForm" style="display:none;margin-top:10px">
+        <div class="row" style="gap:8px">
+          <label class="fld" style="flex:0 0 100px;margin-bottom:0">
+            <span>楼层</span>
+            <select class="inp" id="cFloor"></select>
+          </label>
+          <label class="fld" style="flex:1;margin-bottom:0">
+            <span>铺位号 / 店名</span>
+            <input class="inp" id="cBooth" placeholder="如 A12 或 美甲店" autocomplete="off">
+          </label>
+        </div>
+        <div id="boothChips" class="tagpick" style="margin-top:8px"></div>
+      </div>
     </div>
 
-    <div class="sec-title"><span class="bar"></span>来点什么<span class="hint">点一下就加进篮子</span></div>
+    <div class="sec-title"><span class="bar"></span>来点什么<span class="hint">点一行就加进篮子</span></div>
     <div class="chipbar" id="catBar"></div>
-    <div class="grid" id="prodGrid"></div>
+    <div id="prodGrid"></div>
 
-    <div class="sec-title"><span class="bar"></span>没找到?自己写<span class="hint">想买啥都能打字</span></div>
-    <div class="card">
+    <div class="card" style="margin-top:8px">
       <div class="row" style="gap:8px">
-        <input class="inp" id="cCustom" placeholder="比如:要一包纸巾" autocomplete="off" style="flex:1">
+        <input class="inp" id="cCustom" placeholder="没找到?直接打字,比如「创可贴」" autocomplete="off" style="flex:1">
         <button class="btn" id="btnCustom" style="flex:none">加入</button>
       </div>
       <div class="tagpick" id="quickTags"></div>
@@ -565,7 +581,9 @@ if (!window.MallCore) {
     tab: 'pending',
     lastCount: store.all().length,
     openItem: null,          // 商品详情抽屉里的临时对象
-    sound: true
+    sound: true,
+    prodAll: false,          // 商品列表是否展开全部(默认收起,保持一屏)
+    addrOpen: false          // 地址编辑区是否展开
   };
 
   var PREF = 'mallDelivery.pref.v1';
@@ -702,7 +720,11 @@ if (!window.MallCore) {
     bar.innerHTML = '';
     catList().forEach(function (c) {
       var b = el('button', 'chip' + (ui.cat === c ? ' on' : ''), esc(c));
-      b.onclick = function () { ui.cat = c; renderCats(); renderProducts(); };
+      b.onclick = function () {
+        ui.cat = c;
+        ui.prodAll = false;      // 换分类时把列表收回去,保持一屏
+        renderCats(); renderProducts();
+      };
       bar.appendChild(b);
     });
   }
@@ -713,29 +735,56 @@ if (!window.MallCore) {
     }, 0);
   }
 
+  // 紧凑商品列表:一行一个。默认只显示这么多,避免页面变长要滑动。
+  var PROD_PAGE = 7;
+
   function renderProducts() {
-    var grid = $('prodGrid');
-    grid.innerHTML = '';
+    var box = $('prodGrid');
+    box.innerHTML = '';
     var list = C.CATALOG.filter(function (p) {
       return ui.cat === '全部' || p.cat === ui.cat;
     });
     if (!list.length) {
-      grid.appendChild(el('div', 'empty', '<div class="big">🧐</div>这个分类暂时没东西'));
+      box.appendChild(el('div', 'empty', '<div class="big">🧐</div>这个分类暂时没东西'));
       return;
     }
-    list.forEach(function (p) {
-      var q = cartQtyOf(p.name);
-      var card = el('div', 'prod');
-      card.innerHTML =
-        (p.hot ? '<span class="hot">常点</span>' : '') +
-        (q ? '<span class="qtybadge">' + q + '</span>' : '') +
-        '<div class="emoji">' + catEmoji(p.cat) + '</div>' +
-        '<div><div class="nm">' + esc(p.name) + '</div><div class="sp">' + esc(p.spec) + '</div></div>' +
-        '<div class="foot"><span class="price"><i>¥</i>' + p.price.toFixed(2) + '</span>' +
-        '<span class="add">+</span></div>';
-      card.onclick = function () { openItemSheet(p); };
-      grid.appendChild(card);
+
+    // 已经放进篮子的排前面,方便再加一份
+    var sorted = list.slice().sort(function (a, b) {
+      var qa = cartQtyOf(a.name), qb = cartQtyOf(b.name);
+      if (qa !== qb) return qb - qa;
+      if (!!a.hot !== !!b.hot) return a.hot ? -1 : 1;
+      return 0;
     });
+
+    var showAll = ui.prodAll;
+    var shown = showAll ? sorted : sorted.slice(0, PROD_PAGE);
+
+    var wrap = el('div', 'plist');
+    shown.forEach(function (p) {
+      var q = cartQtyOf(p.name);
+      var row = el('div', 'prow' + (p.hot ? ' hot-row' : ''));
+      row.innerHTML =
+        '<span class="em">' + catEmoji(p.cat) + '</span>' +
+        '<span class="mid"><span class="nm">' + esc(p.name) + '</span>' +
+          '<span class="sp">' + esc(p.spec) + '</span></span>' +
+        (p.hot ? '<span class="hotd">常点</span>' : '') +
+        (q ? '<span class="qb">' + q + '</span>' : '') +
+        '<span class="pr"><i>¥</i>' + p.price.toFixed(2) + '</span>' +
+        '<span class="add">+</span>';
+      row.onclick = function () { openItemSheet(p); };
+      wrap.appendChild(row);
+    });
+    box.appendChild(wrap);
+
+    // 剩下的收在「展开」里 —— 这样一屏放得下,不用滑动
+    if (sorted.length > PROD_PAGE) {
+      var b = el('button', 'morebtn', showAll
+        ? '收起'
+        : '还有 ' + (sorted.length - PROD_PAGE) + ' 样 · 展开看看');
+      b.onclick = function () { ui.prodAll = !ui.prodAll; renderProducts(); };
+      box.appendChild(b);
+    }
   }
 
   function catEmoji(cat) {
@@ -1360,6 +1409,7 @@ if (!window.MallCore) {
     renderCartBar();
     if (ui.role === 'cust') {
       renderFloorsIfNeeded();
+      renderAddrBar();
       renderBoothChips();
       renderCats();
       renderProducts();
@@ -1387,8 +1437,33 @@ if (!window.MallCore) {
   }
 
   /* ================= 输入绑定 ================= */
-  $('cFloor').onchange = function () { ui.floor = this.value; savePref(); };
-  $('cBooth').oninput = function () { ui.booth = this.value; savePref(); };
+  $('cFloor').onchange = function () { ui.floor = this.value; savePref(); renderAddrBar(); };
+  $('cBooth').oninput = function () { ui.booth = this.value; savePref(); renderAddrBar(); };
+
+  // 地址区默认收起,只占一行;点「改」才展开表单
+  function setAddrOpen(open) {
+    ui.addrOpen = open;
+    $('addrForm').style.display = open ? 'block' : 'none';
+    $('addrBar').style.display = open ? 'none' : 'flex';
+  }
+  $('btnAddr').onclick = function () {
+    setAddrOpen(true);
+    setTimeout(function () { $('cBooth').focus(); }, 60);
+  };
+
+  // 一行摘要,让人一眼知道东西会送到哪
+  function renderAddrBar() {
+    var booth = C.normalizeBooth(ui.booth);
+    if (booth) {
+      $('addrNow').textContent = ui.floor + ' ' + booth;
+      $('addrSub').textContent = ui.contact
+        ? (ui.contact + (ui.phone ? ' · ' + ui.phone : ''))
+        : '点「改」可以换地方';
+    } else {
+      $('addrNow').textContent = '还没有填过位置';
+      $('addrSub').textContent = '点右边「改」填一下,填过就会记住';
+    }
+  }
 
   function syncBoothInputs() {
     renderFloors();
@@ -1419,6 +1494,8 @@ if (!window.MallCore) {
 
   /* ================= 启动 ================= */
   syncBoothInputs();
+  // 地址区默认收起:如果已经有记住的位置就显示摘要,没有也收起(点「改」才填)
+  setAddrOpen(false);
   $('soundOn').checked = ui.sound;
   setRole('cust');
 
