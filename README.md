@@ -164,7 +164,58 @@ $env:SMOKE_DEBUG='1'; node test/smoke.js
 
 ---
 
-## 七、数据存在哪 / 怎么清空
+## 七、怎么让别人也能打开
+
+⚠️ **先搞清楚一件事**:这个 Demo 的数据存在**每个人自己的浏览器**里(`localStorage`)。
+所以你把网址发出去,别人打开看到的是**他自己的空白副本** —— 他在手机上下的单,你的页面上看不到。
+
+**发出去能让人玩、能演示,但它不是"多人共用一个系统"。** 想那样必须加后端(见第八节第 5 条)。
+
+| 方式 | 怎么做 | 适合 |
+|---|---|---|
+| **发文件夹** | 把整个 `mall-delivery` 打包成 zip 发出去,对方解压后双击 `index.html` | 给用电脑的人看。注意别只发 `index.html`,它要引用 `src/core.js` |
+| **局域网** | 在项目目录跑 `serve.cmd`,然后让同一 WiFi 下的人打开 `http://<你的内网IP>:8000/mall-delivery/index.html` | 现场几个人一起看 |
+| **公网托管** | 推到 GitHub → 开 Pages,得到 `https://用户名.github.io/mall-delivery/` | 想发个链接随时能打开 |
+
+### 推到 GitHub(项目里已经准备好了)
+
+双击 **`push-to-github.cmd`**,它会:
+
+1. 检查环境和当前提交
+2. 让你粘贴一个 **GitHub Personal Access Token**(隐藏输入,只在这一个窗口里用)
+3. 确认身份后,**自动创建仓库** `swishria/mall-delivery`(如果不存在)
+4. 把代码推上去
+5. 打印仓库地址,以及在浏览器里开 Pages 的步骤
+
+**关于那个 token**:这台机器上没有 GitHub 凭据、也没有 SSH 私钥,所以 git 没法认证,token 是最快的路。
+去 <https://github.com/settings/tokens/new?scopes=repo&description=mall-delivery> 建一个,勾上 `repo` 就行。
+脚本**不会**把 token 写进 `.git/config`(推送时用一次即丢),用完你可以随时去 GitHub 撤销它。
+
+**如果推的时候报 `schannel` 或 SSL 错误**,先在这台机器上执行一次:
+
+```powershell
+git config --global http.sslBackend openssl
+```
+
+然后重新双击那个脚本。
+
+### 不开 GitHub 也能分享
+
+项目根目录还有个 `mall-delivery.bundle`(在上一级 `D:\test\` 里),它是完整的 git 仓库快照。
+对方拿到这个文件,一条命令就能得到一个一模一样的仓库:
+
+```powershell
+git clone mall-delivery.bundle mall-delivery
+```
+
+### 想让别人在微信里打开?
+
+微信会拦截**未备案域名**的外链,所以在微信内置浏览器里体验受限。
+如果你的目的是"发给微信好友看",最稳的是**直接发 zip**(方式 1)。
+
+---
+
+## 八、数据存在哪 / 怎么清空
 
 - 存在浏览器 `localStorage`,键名 `mallDelivery.v1`(偏好设置是 `mallDelivery.pref.v1`)
 - 刷新页面数据还在;清浏览器缓存会没
@@ -172,7 +223,7 @@ $env:SMOKE_DEBUG='1'; node test/smoke.js
 
 ---
 
-## 八、可以接着玩的方向
+## 九、可以接着玩的方向
 
 按难度排序,都是这个 Demo 自然的延伸:
 
@@ -180,13 +231,13 @@ $env:SMOKE_DEBUG='1'; node test/smoke.js
 2. **改规则**:`RULES` 里加起送金额、楼内配送费、满额减免(算钱函数已经支持了)
 3. **加打印**:接单后生成一张小票样式的文本卡片,方便截图/复制
 4. **加月结**:用 `creditByBooth()` 按月汇总,导出一张"这个月谁欠多少"的账单
-5. **换成真后端**:把 `createStore({ save, hydrate })` 的两个钩子接到云开发数据库,界面不用动
+5. **换成真后端**:把 `createStore({ save, hydrate })` 的两个钩子接到云开发数据库 / Supabase,界面不用动 —— **这一步做完,它才真正变成"多人共用一个系统"**
 6. **重做成微信小程序**:逻辑层 `core.js` 可以整段搬过去,只把界面换成 wxml/wxss
 7. **重写成 React/Vue**:同一套数据模型换个框架实现一遍 —— 这是最划算的学习法
 
 ---
 
-## 九、已知的取舍(不是 bug)
+## 十、已知的取舍(不是 bug)
 
 - 没有登录和权限:顾客端和商家端靠手动切换。真上线必须拆开
 - 没有并发处理:两个窗口同时改同一条订单会互相覆盖(本地存储的固有限制)
