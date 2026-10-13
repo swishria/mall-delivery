@@ -1,0 +1,28 @@
+# 这个项目是一个纯静态的练习 Demo,没有构建产物、没有依赖。
+# 下面这些是防止误提交的系统/编辑器垃圾文件。
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+._*
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 临时文件(项目里正常不该出现)
+*.tmp
+*.bak
+*.log
+dom*.html
+dbg.txt
+o.txt
