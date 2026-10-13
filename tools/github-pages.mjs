@@ -52,12 +52,14 @@ try {
     process.exit(1);
   }
 
-  const size = repoInfo.data.size;
   const defaultBranch = repoInfo.data.default_branch;
 
-  // 2. 仓库是空的就没法开 Pages
-  if (size === 0) {
-    console.log('FAIL repo is empty - the push has not succeeded yet');
+  // 2. 仓库必须有内容才谈得上开 Pages。
+  //    注意:不能用 repoInfo.data.size —— GitHub 对新推送的仓库会延迟上报体积,
+  //    明明已经推上去了却可能返回 0,所以这里改成看提交数。
+  const commits = await api('GET', `/repos/${owner}/${repo}/commits?per_page=1`);
+  if (commits.status !== 200 || !Array.isArray(commits.data) || commits.data.length === 0) {
+    console.log('FAIL repo has no commits yet - the push has not succeeded');
     process.exit(1);
   }
 
