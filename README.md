@@ -34,6 +34,12 @@ mall-delivery/
   test/smoke.js       界面冒烟测试(86 项,用假 DOM 跑真实页面脚本)
   run-tests.cmd       一键跑两套测试(双击即可,推荐)
   run-tests.ps1       同上,PowerShell 版
+  serve.cmd           局域网共享,自动列出你的内网 IP
+  push-to-github.cmd  一键推送到 GitHub(要一个 token)
+  enable-pages.cmd    一键开启 GitHub Pages(推送成功后再跑)
+  share-public.cmd    不要账号,开个临时公网隧道
+  download.cmd        多级回退下载器,被上面两个脚本调用
+  tools/github-pages.mjs  调 GitHub API 开 Pages(用 Node 发请求)
   README.md           你现在看的这个
 ```
 
@@ -185,13 +191,21 @@ $env:SMOKE_DEBUG='1'; node test/smoke.js
 2. 让你粘贴一个 **GitHub Personal Access Token**(隐藏输入,只在这一个窗口里用)
 3. 确认身份后,**自动创建仓库** `swishria/mall-delivery`(如果不存在)
 4. 把代码推上去
-5. 打印仓库地址,以及在浏览器里开 Pages 的步骤
+5. 提示你开启 Pages
+
+推送成功后,再双击 **`enable-pages.cmd`**(填同一个 token)就能把网页发布出来:
+
+```
+https://swishria.github.io/mall-delivery/
+```
+
+头一次要等 1–3 分钟才会生效。
 
 **关于那个 token**:这台机器上没有 GitHub 凭据、也没有 SSH 私钥,所以 git 没法认证,token 是最快的路。
 去 <https://github.com/settings/tokens/new?scopes=repo&description=mall-delivery> 建一个,勾上 `repo` 就行。
-脚本**不会**把 token 写进 `.git/config`(推送时用一次即丢),用完你可以随时去 GitHub 撤销它。
+脚本**不会**把 token 写进 `.git/config`(推送时用一次即丢),**用完请去 <https://github.com/settings/tokens> 删掉它**。
 
-**如果推的时候报 `schannel` 或 SSL 错误**,先在这台机器上执行一次:
+**如果推的时候报 `schannel` 或 SSL 错误**,先执行一次:
 
 ```powershell
 git config --global http.sslBackend openssl
