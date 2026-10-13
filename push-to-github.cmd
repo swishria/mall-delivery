@@ -88,38 +88,51 @@ git remote remove origin >nul 2>nul
 git remote add origin "https://github.com/!OWNER!/!REPO!.git"
 
 REM Feed the token through the URL for this one command only.
-git push "https://!TOKEN!@github.com/!OWNER!/!REPO!.git" -u origin !BRANCH!
+REM IMPORTANT: use an explicit refspec (localBranch:remoteBranch).
+REM Writing "origin" in front of the branch name here makes git look for a
+REM branch literally called "origin", which fails with:
+REM   error: src refspec origin does not match any
+echo       pushing !BRANCH! ...
+git push "https://!TOKEN!@github.com/!OWNER!/!REPO!.git" !BRANCH!:!BRANCH!
 if errorlevel 1 (
-  echo.
-  echo   Normal push was refused. The remote may already contain commits
-  echo   ^(for example a README created in the browser^).
-  echo.
-  choice /c YN /m "Overwrite the remote with this local history"
-  if errorlevel 2 ( echo [X] Stopped. Nothing was pushed. & pause & exit /b 1 )
-  git push "https://!TOKEN!@github.com/!OWNER!/!REPO!.git" -u origin !BRANCH! --force
+  echo       retrying with --all ...
+  git push "https://!TOKEN!@github.com/!OWNER!/!REPO!.git" --all
 )
 if errorlevel 1 (
-  echo [X] Push failed.
-  echo     - if it mentions schannel or SSL, run this first:
-  echo         git config --global http.sslBackend openssl
-  echo     - then run this file again
+  echo.
+  echo [X] Push failed. Common causes:
+  echo     - SSL / schannel error  -^> run this once, then run this file again:
+  echo           git config --global http.sslBackend openssl
+  echo     - could not connect    -^> network or firewall blocks github.com
+  echo     - wrong / expired token -^> make a new one with the "repo" scope
   pause & exit /b 1
 )
+
+REM remember the upstream so a later plain "git push" works
+git branch --set-upstream-to=origin/!BRANCH! !BRANCH! >nul 2>nul
 echo       pushed.
 git config credential.helper manager
 
-REM ---------- 4. Pages hint ----------
+REM ---------- 4. what next ----------
 echo.
 echo [4/4] Done.
 echo.
-echo   Code   : https://github.com/!OWNER!/!REPO!
-echo   Site   : https://!OWNER!.github.io/!REPO!/    (after Pages is on^)
+echo   Code : https://github.com/!OWNER!/!REPO!
+echo   Site : https://!OWNER!.github.io/!REPO!/
 echo.
-echo   To turn Pages on, run this one-liner in a new terminal, or
-echo   do it in the browser: Settings -^> Pages -^> Source: main / root
+echo   The site needs GitHub Pages turned on once:
+echo     open https://github.com/!OWNER!/!REPO!/settings/pages
+echo     Source: Deploy from a branch   Branch: !BRANCH!   Folder: / (root)
+echo     then Save. It takes 1-3 minutes to go live.
 echo.
-echo     powershell -NoProfile -Command "$h=@{Authorization='Bearer !TOKEN!';'User-Agent'='ml'}; $b=@{source=@{branch='!BRANCH!';path='/'}}; Invoke-RestMethod -Method Post -Uri 'https://api.github.com/repos/!OWNER!/!REPO!/pages' -Headers $h -Body ($b|ConvertTo-Json) -ContentType 'application/json'"
+echo   Or run enable-pages.cmd next to this file, which does it for you.
 echo.
-echo   (that command reuses the same token; treat it as a secret)
+echo   ------------------------------------------------------------
+echo   SECURITY: the token you pasted was used only in this window
+echo   and was NOT written into .git/config. You can (and should)
+echo   delete it now at:
+echo     https://github.com/settings/tokens
+echo   Deleting it does not affect the code that was just pushed.
+echo   ------------------------------------------------------------
 echo.
 pause
