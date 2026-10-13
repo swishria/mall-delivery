@@ -11,21 +11,33 @@ if errorlevel 1 (
   set "NODE=node"
 )
 
+set FAILED=0
+
 echo.
-echo ==== 1/2  core logic tests ====
+echo ==== 1/4  HTML tag nesting ====
+"%NODE%" test\check-html.js
+if errorlevel 1 set FAILED=1
+
+echo.
+echo ==== 2/4  core logic ====
 "%NODE%" test\core.test.js
-set LOGIC=%ERRORLEVEL%
+if errorlevel 1 set FAILED=1
 
 echo.
-echo ==== 2/2  UI smoke test ====
+echo ==== 3/4  layout / CSS regression ====
+"%NODE%" test\layout.test.js
+if errorlevel 1 set FAILED=1
+
+echo.
+echo ==== 4/4  UI smoke test ====
 "%NODE%" test\smoke.js
-set SMOKE=%ERRORLEVEL%
+if errorlevel 1 set FAILED=1
 
 echo.
-if "%LOGIC%"=="0" if "%SMOKE%"=="0" (
+if "%FAILED%"=="0" (
   echo ALL TESTS PASSED.
 ) else (
-  echo FAILED: core=%LOGIC% smoke=%SMOKE%
+  echo SOME TESTS FAILED - see above.
 )
 echo.
 pause

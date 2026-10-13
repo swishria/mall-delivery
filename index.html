@@ -13,23 +13,41 @@
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0}
+  html{height:100%}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
     background:var(--bg); color:var(--ink); font-size:14px; line-height:1.5;
     display:flex; justify-content:center; padding:0;
+    min-height:100dvh; overflow:hidden;
+  }
+  /* 老浏览器没有 dvh 时退回 vh */
+  @supports not (min-height:100dvh){
+    body{min-height:100vh}
+  }
+  /* 宽屏上留出边距、显示成一部"手机",这时允许页面本身滚动 */
+  @media(min-width:520px){
+    body{min-height:0;height:auto;overflow:auto;padding:22px 0;background:#dfe4ec}
   }
   button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   input,textarea,select{font:inherit;color:inherit}
   h1,h2,h3,h4{margin:0;font-weight:700}
 
   /* ---------- 手机外壳 ---------- */
+  /* 移动端:外壳就占满一屏,内部滚动。
+     不要再用「整页滚动 + absolute 浮层」那种结构 —— 移动端浏览器里
+     100vh 会被地址栏收放影响,外壳一被撑高,absolute 的浮层就会漏到
+     文档流里(曾经真的出过这个 bug:手机滚到底能看到本该隐藏的抽屉)。 */
   .phone{
-    width:100%; max-width:430px; min-height:100vh; background:var(--bg);
+    width:100%; max-width:430px; min-height:100dvh; background:var(--bg);
     position:relative; display:flex; flex-direction:column; box-shadow:0 0 60px rgba(20,26,38,.10);
+    overflow:hidden
+  }
+  /* 不支持 dvh 的老浏览器退回 vh */
+  @supports not (min-height:100dvh){
+    .phone{min-height:100vh}
   }
   @media(min-width:520px){
-    body{padding:22px 0;background:#dfe4ec}
-    .phone{min-height:calc(100vh - 44px);border-radius:22px;overflow:hidden}
+    .phone{min-height:calc(100dvh - 44px);border-radius:22px}
   }
 
   /* ---------- 顶栏 ---------- */
@@ -132,13 +150,15 @@
   .empty .big{font-size:34px;margin-bottom:8px}
 
   /* ---------- 购物车栏 ---------- */
+  /* fixed + 居中,理由同抽屉 */
   .cartbar{
-    position:absolute;left:12px;right:12px;bottom:12px;z-index:45;
+    position:fixed;left:50%;transform:translateX(-50%);bottom:12px;
+    width:calc(100% - 24px);max-width:406px;z-index:45;
     background:#1b2231;color:#fff;border-radius:16px;padding:11px 13px;
     display:flex;align-items:center;gap:11px;box-shadow:0 12px 30px -8px rgba(15,20,30,.5);
-    transition:.22s cubic-bezier(.2,.9,.3,1.2)
+    transition:transform .22s cubic-bezier(.2,.9,.3,1.2),opacity .22s
   }
-  .cartbar.hide{transform:translateY(130%);opacity:0;pointer-events:none}
+  .cartbar.hide{transform:translate(-50%,130%);opacity:0;pointer-events:none}
   .cartbar .ic{
     position:relative;width:38px;height:38px;border-radius:11px;background:var(--brand);
     display:grid;place-items:center;font-size:18px;flex:none
@@ -152,17 +172,22 @@
   .cartbar .sub{font-size:10.5px;opacity:.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* ---------- 抽屉 ---------- */
+  /* 全部用 position:fixed,相对视口定位。
+     原因见上面 .phone 的注释:外壳有 overflow:hidden,
+     子元素再用 absolute 往外跑就会被裁掉或漏进文档流。 */
   .mask{
-    position:absolute;inset:0;background:rgba(15,20,30,.45);z-index:60;opacity:0;
-    pointer-events:none;transition:.2s;backdrop-filter:blur(1px)
+    position:fixed;inset:0;background:rgba(15,20,30,.45);z-index:60;opacity:0;
+    pointer-events:none;transition:.2s;backdrop-filter:blur(1px);
+    left:50%;transform:translateX(-50%);width:100%;max-width:430px
   }
   .mask.on{opacity:1;pointer-events:auto}
   .sheet{
-    position:absolute;left:0;right:0;bottom:0;z-index:61;background:#fff;
-    border-radius:20px 20px 0 0;max-height:82%;display:flex;flex-direction:column;
-    transform:translateY(102%);transition:.26s cubic-bezier(.2,.9,.3,1)
+    position:fixed;left:50%;transform:translate(-50%,102%);bottom:0;width:100%;max-width:430px;
+    z-index:61;background:#fff;border-radius:20px 20px 0 0;max-height:82vh;
+    display:flex;flex-direction:column;
+    transition:transform .26s cubic-bezier(.2,.9,.3,1)
   }
-  .sheet.on{transform:translateY(0)}
+  .sheet.on{transform:translate(-50%,0)}
   .sheet .hd{
     padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;flex:none
   }
@@ -263,8 +288,9 @@
   .owe-row:last-child{border-bottom:0}
 
   /* 空态 / 提示 */
+  /* 同样是 fixed:absolute 会跟着被撑高的外壳跑偏 */
   .toast{
-    position:absolute;left:50%;top:68px;transform:translate(-50%,-14px);z-index:90;
+    position:fixed;left:50%;top:68px;transform:translate(-50%,-14px);z-index:90;
     background:rgba(24,30,42,.94);color:#fff;padding:9px 16px;border-radius:99px;font-size:13px;
     font-weight:600;opacity:0;transition:.22s;pointer-events:none;max-width:86%;text-align:center
   }
