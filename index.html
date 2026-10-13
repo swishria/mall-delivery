@@ -13,41 +13,34 @@
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0}
-  html{height:100%}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
     background:var(--bg); color:var(--ink); font-size:14px; line-height:1.5;
     display:flex; justify-content:center; padding:0;
-    min-height:100dvh; overflow:hidden;
   }
-  /* 老浏览器没有 dvh 时退回 vh */
-  @supports not (min-height:100dvh){
-    body{min-height:100vh}
-  }
-  /* 宽屏上留出边距、显示成一部"手机",这时允许页面本身滚动 */
+  /* 宽屏上留出边距、显示成一部"手机" */
   @media(min-width:520px){
-    body{min-height:0;height:auto;overflow:auto;padding:22px 0;background:#dfe4ec}
+    body{padding:22px 0;background:#dfe4ec}
   }
   button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   input,textarea,select{font:inherit;color:inherit}
   h1,h2,h3,h4{margin:0;font-weight:700}
 
   /* ---------- 手机外壳 ---------- */
-  /* 移动端:外壳就占满一屏,内部滚动。
-     不要再用「整页滚动 + absolute 浮层」那种结构 —— 移动端浏览器里
-     100vh 会被地址栏收放影响,外壳一被撑高,absolute 的浮层就会漏到
-     文档流里(曾经真的出过这个 bug:手机滚到底能看到本该隐藏的抽屉)。 */
+  /* 布局上的两个坑,这里都刻意避开了:
+     1) 不要让 body 锁死高度 + 内部区域滚动 —— 嵌套滚动在移动端不可靠,
+        一旦内部区域没被正确约束,整页就滑不动(真的踩过)。
+        这里改成最稳的做法:页面自己滚动。
+     2) 浮层不要用 position:absolute —— 移动端 100vh 会随地址栏收放变化,
+        外壳被撑高后 absolute 浮层会漏进文档流(也踩过)。
+        所以抽屉/购物车栏/提示条一律 position:fixed。 */
   .phone{
-    width:100%; max-width:430px; min-height:100dvh; background:var(--bg);
-    position:relative; display:flex; flex-direction:column; box-shadow:0 0 60px rgba(20,26,38,.10);
-    overflow:hidden
-  }
-  /* 不支持 dvh 的老浏览器退回 vh */
-  @supports not (min-height:100dvh){
-    .phone{min-height:100vh}
+    width:100%; max-width:430px; background:var(--bg);
+    display:flex; flex-direction:column;
+    box-shadow:0 0 60px rgba(20,26,38,.10)
   }
   @media(min-width:520px){
-    .phone{min-height:calc(100dvh - 44px);border-radius:22px}
+    .phone{min-height:calc(100dvh - 44px);border-radius:22px;overflow:hidden}
   }
 
   /* ---------- 顶栏 ---------- */
@@ -79,7 +72,11 @@
   @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
 
   /* ---------- 通用 ---------- */
-  .scroll{flex:1;overflow-y:auto;padding:12px 12px 130px;scroll-behavior:smooth}
+  /* 内容区:不再自己滚动,交给页面滚 —— 移动端最稳 */
+  .scroll{
+    flex:1; padding:12px 12px calc(130px + env(safe-area-inset-bottom));
+    scroll-behavior:smooth
+  }
   .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:12px;margin-bottom:10px}
   .row{display:flex;align-items:center;gap:8px}
   .muted{color:var(--ink2);font-size:12px}

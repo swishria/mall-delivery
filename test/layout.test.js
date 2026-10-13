@@ -139,15 +139,20 @@ group('4. 页面外壳不该出现文档级滚动(移动端)');
 const body = ruleBody('body');
 ok('body 规则存在', body !== null);
 if (body) {
-  ok('body 有 overflow:hidden(移动端不滚动整页)', /overflow\s*:\s*hidden/.test(body), body.slice(0, 160));
-  ok('body 用 dvh 而不是只写 vh', /100dvh/.test(body), body.slice(0, 160));
+  // 这是踩过的第二个坑:把 body 锁成 overflow:hidden、指望内部区域自己滚,
+  // 结果移动端整个页面都滑不动了。页面自己滚才最稳,所以这里断言"没有锁死"。
+  ok('body 没有被锁死(不能有 overflow:hidden)', !/overflow\s*:\s*hidden/.test(body), body.slice(0, 160));
+  ok('body 没有固定高度(height:100%)', !/height\s*:\s*100%/.test(body), body.slice(0, 160));
 }
 
 const phone = ruleBody('.phone');
 ok('.phone 规则存在', phone !== null);
 if (phone) {
-  ok('.phone 用 dvh', /100dvh/.test(phone), phone.match(/min-height[^;]*/));
-  ok('.phone 有 overflow:hidden(兜底裁剪)', /overflow\s*:\s*hidden/.test(phone), phone.slice(0, 160));
+  // 移动端外壳由内容撑高,由页面滚动;固定高度会引出嵌套滚动问题
+  ok('.phone 在移动端不锁高度(min-height 只在宽屏媒体查询里)',
+    !/min-height\s*:\s*100/.test(phone), phone.match(/min-height[^;]*/) || '(无)');
+  ok('.phone 在移动端不裁剪内容(overflow 只在宽屏媒体查询里)',
+    !/overflow\s*:\s*hidden/.test(phone), phone.match(/overflow[^;]*/) || '(无)');
 }
 
 group('5. 宽屏上仍保留"手机外框"效果');
@@ -157,21 +162,28 @@ const widePhone = ruleBodyIn('.phone', 'min-width:520px');
 ok('存在 min-width:520px 下的 body 规则', wideBody !== null);
 ok('存在 min-width:520px 下的 .phone 规则', widePhone !== null);
 if (wideBody) {
-  ok('宽屏上放开页面滚动(overflow:auto)', /overflow\s*:\s*auto/.test(wideBody), wideBody);
+  ok('宽屏上 body 有边距和底色', /padding/.test(wideBody) && /background/.test(wideBody), wideBody);
 }
 if (widePhone) {
-  ok('宽屏上给外壳留出边距并圆角', /border-radius/.test(widePhone), widePhone);
+  ok('宽屏上给外壳圆角', /border-radius/.test(widePhone), widePhone);
+  ok('宽屏上外壳裁剪圆角(overflow:hidden)', /overflow\s*:\s*hidden/.test(widePhone), widePhone);
 }
 
 // 外壳本身在默认样式里就该限制宽度
 ok('外壳默认就有 max-width:430px', phone !== null && /max-width\s*:\s*430px/.test(phone),
   phone && phone.match(/max-width[^;]*/));
 
-group('6. 内部滚动区仍然可滚');
+group('6. 内容区交给页面滚动(不能在内部再套一层滚动)');
 
 const scroll = ruleBody('.scroll');
-ok('.scroll 有 overflow-y:auto', scroll !== null && /overflow-y\s*:\s*auto/.test(scroll), scroll && scroll.slice(0, 120));
-ok('.scroll 用 flex:1 占满剩余高度', scroll !== null && /flex\s*:\s*1/.test(scroll));
+ok('.scroll 规则存在', scroll !== null);
+if (scroll) {
+  ok('.scroll 用 flex:1', /flex\s*:\s*1/.test(scroll), scroll.slice(0, 120));
+  // 嵌套滚动是移动端滑不动的主因,这里明确禁止
+  ok('.scroll 没有 overflow-y:auto(不要嵌套滚动)',
+    !/overflow-y\s*:\s*auto/.test(scroll), scroll.slice(0, 140));
+  ok('.scroll 底部留了给购物车栏的余量', /padding-bottom|padding:/.test(scroll), scroll.slice(0, 140));
+}
 
 group('7. 结构完整性');
 
